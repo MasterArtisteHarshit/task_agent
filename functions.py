@@ -17,27 +17,27 @@ def get_task_output(AIPROXY_TOKEN, task):
     )
     # print(response.choices[0].message.content.strip())
     return response.choices[0].message.content.strip()
-def count_days(dayname:str):
-    ## count sundays instead of sunday
-    days = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
-    dayvalue = 2
-    day = None
-    for d in days:
-        if d in dayname.lower():
-            dayvalue = days[d]
-            day = d
-            break
-    try:
-        print("This will not cause any error")
-        with open("/data/dates.txt","r") as file:
-            print("My line")
-            data = file.readlines()
-            count  = sum([1 for line in data if datetime.strptime( line.strip(),"%Y-%m-%d").weekday()==dayvalue])
-            f = open("/data/{}-count".format(day), "w")
-            f.write(str(count))
-            f.close()
-    except:
-        print("There is no File in data directory try making one")
+# def count_days(dayname:str):
+#     ## count sundays instead of sunday
+#     days = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
+#     dayvalue = -1
+#     day = None
+#     for d in days:
+#         if d in dayname.lower():
+#             dayvalue = days[d]
+#             day = d
+#             break
+#     try:
+#         print("This will not cause any error")
+#         with open("/data/dates.txt","r") as file:
+#             print("My line")
+#             data = file.readlines()
+#             count  = sum([1 for line in data if datetime.strptime( line.strip(),"%Y-%m-%d").weekday()==dayvalue])
+#             f = open("/data/{}-count".format(day), "w")
+#             f.write(str(count))
+#             f.close()
+#     except:
+#         print("There is no File in data directory try making one")
 def extract_dayname(task:str):
     match = re.search(r'count\s+(\w+)',task)
     if match:
@@ -62,3 +62,46 @@ def get_correct_pkgname(pkgname: str):
             elif len(corrects)>=2:
                 return corrects[-1]
         return ""
+    
+
+import re
+from datetime import datetime
+
+def count_days(dayname: str):
+    days = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
+    dayvalue = -1
+    day = None
+    for d in days:
+        if d in dayname.lower():
+            dayvalue = days[d]
+            day = d
+            break
+            
+    try:
+        with open("/data/dates.txt", "r") as file:
+            dates = file.readlines()
+            count = 0
+            for line in dates:
+                date_str = line.strip()
+                # Handle different date formats
+                date_formats = [
+                    "%Y-%m-%d",
+                    "%d-%b-%Y",
+                    "%b %d, %Y",
+                    "%Y/%m/%d %H:%M:%S"
+                ]
+                
+                for fmt in date_formats:
+                    try:
+                        date_obj = datetime.strptime(date_str, fmt)
+                        if date_obj.weekday() == dayvalue:
+                            count += 1
+                        break
+                    except ValueError:
+                        continue
+                        
+            with open(f"/data/dates-{day}s.txt", "w") as outfile:
+                outfile.write(str(count))
+            return count
+    except FileNotFoundError:
+        raise FileNotFoundError("dates.txt file not found in /data directory")
