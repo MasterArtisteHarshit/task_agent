@@ -20,7 +20,7 @@ def get_task_output(AIPROXY_TOKEN, task):
 def count_days(dayname:str):
     ## count sundays instead of sunday
     days = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
-    dayvalue = -1
+    dayvalue = 2
     day = None
     for d in days:
         if d in dayname.lower():
